@@ -19,7 +19,7 @@ wheelgap psycopg2 numpy==2.3.4    # package names, with or without a version
 | [`Pipfile.lock`](#pipfilelock) | no | no |
 | [`pixi.lock`](#pixilock) | no | no |
 | [requirements files](#requirements-files) | no | no |
-| [`pyproject.toml`](#pyprojecttoml) | no | no |
+| [`pyproject.toml`](#pyprojecttoml) | no | with `--deps` |
 | [package names](#package-names) | no | with `--deps` |
 
 "Read without network" means the lockfile records every file published for each pinned version, so wheelgap
@@ -254,14 +254,17 @@ wheelgap pyproject.toml -t win-arm64 -t pyodide
 # Add [project.optional-dependencies] groups
 wheelgap pyproject.toml --extra test
 wheelgap pyproject.toml --all-extras
+# Resolve what the declared requirements and the selected extra install
+wheelgap pyproject.toml --extra test --deps -t win-arm64 --explain
 ```
 
 Each requirement is read like a line of a requirements file, so ranges and bare names use the newest matching release
 and markers are respected. A range picks the newest release whose `Requires-Python` allows each `-p` version, so with
 several it can pick a different release per Python ([how it works](how-it-works.md)). A bare name always checks the
 latest release, even for a `-p` version that can't install it, so it can show false gaps. Only direct
-dependencies are checked: their own dependencies aren't, and wheelgap always prints a note saying so. Use a lockfile
-for the full picture.
+dependencies are checked by default and wheelgap prints a note saying so. Add [`--deps`](cli.md#deps) to resolve
+them and the selected extras using PyPI's metadata for each target. Projects that configure a custom installer
+index or source need a lockfile for this check.
 
 If `[project] requires-python` leaves out a `-p` Python (every clause counts, as pip applies them), that target is
 still checked and a note names it; an invalid `requires-python` is ignored with a note.

@@ -298,7 +298,7 @@ def _lookup_error(e: Exception) -> str:
 
 
 def resolve_deps(source: Source, targets: list[Target], resolver: Resolver | None = None) -> None:
-    """Replace a command-line source's packages with what its requirements install on each target."""
+    """Replace the source's packages with what its requirements install on each target."""
     resolver = resolver or Resolver()
     roots = [Requirement(text) for text in source.specs]
     kept = [p for p in source.packages if p.skip]  # a name @ URL: nothing to look up, as without --deps

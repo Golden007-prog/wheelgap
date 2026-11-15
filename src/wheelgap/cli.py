@@ -237,7 +237,7 @@ def make_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--deps",
         action="store_true",
-        help="for package names on the command line, also check what they install, resolved per target from "
+        help="for package names or pyproject.toml, also check what they install, resolved per target from "
         "PyPI's metadata (looks each dependency up on pypi.org; a lockfile is exact)",
     )
     p.add_argument(
@@ -1637,10 +1637,10 @@ def _main(argv: list[str]) -> int:
                 pdm=bool(from_cli or args.only_group) or group_names is not None,
             )
         if args.deps:
-            adhoc = [s for s in sources if s.specs]
-            if not adhoc:
+            dependency_sources = [s for s in sources if s.specs or s.pyproject_extras is not None]
+            if not dependency_sources:
                 raise SourceError(
-                    "--deps applies to package names on the command line (wheelgap --deps mcp); "
+                    "--deps applies to package names on the command line or pyproject.toml; "
                     "a lockfile already lists what it installs"
                 )
             if offline:
@@ -1652,8 +1652,14 @@ def _main(argv: list[str]) -> int:
                     "--deps reads dependencies from PyPI's JSON API, which a simple index (--index-url, or "
                     "index-url in [tool.wheelgap]) doesn't have"
                 )
+            for source in pyproject_sources:
+                if not source.pypi_only:
+                    raise SourceError(
+                        f"{source.label}: the project configures an installer index or source; "
+                        "--deps uses only PyPI, so check a lockfile instead"
+                    )
             resolver = Resolver()
-            for source in adhoc:
+            for source in dependency_sources:
                 resolve_deps(source, targets, resolver)
         if offline:
             require_offline(sources, offline_how, simple_index=index_url)
@@ -1705,12 +1711,13 @@ def _main(argv: list[str]) -> int:
                 print(f"wheelgap: note: {source.label}: {source.poetry_extras_unsure}", file=sys.stderr)
     for source in sources:
         if source.pyproject_extras is not None:  # always: this answer differs from a lockfile's
-            print(
-                f"wheelgap: note: {source.label} lists direct dependencies only; "
-                "their own dependencies aren't checked (use a lockfile for that), and ranges were checked at "
-                "the newest matching release",
-                file=sys.stderr,
-            )
+            if source.deps_paths is None:
+                print(
+                    f"wheelgap: note: {source.label} lists direct dependencies only; "
+                    "their own dependencies aren't checked (use a lockfile for that, or add --deps for PyPI), "
+                    "and ranges were checked at the newest matching release",
+                    file=sys.stderr,
+                )
             if source.requires_python and not quiet:  # the answer is right either way, so -q drops these
                 try:
                     SpecifierSet(source.requires_python)

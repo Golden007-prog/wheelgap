@@ -214,6 +214,43 @@ def test_deps_needs_package_names(tmp_path, index, capsys):
     assert "--deps applies to package names on the command line" in capsys.readouterr().err
 
 
+def test_pyproject_deps_follow_selected_extras_and_target_markers(tmp_path, index, capsys):
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """[project]
+name = "workshop"
+dependencies = ["plain; sys_platform == 'linux'", "b; sys_platform == 'win32'"]
+[project.optional-dependencies]
+crypto = ["app"]
+""",
+        encoding="utf-8",
+    )
+    args = [str(pyproject), "-p", "3.14", "-t", "win-arm64,linux-x86_64", "--explain", "--no-cache"]
+    assert main(args) == 0
+    assert "lists direct dependencies only" in capsys.readouterr().err
+
+    assert main([*args, "--deps", "--extra", "crypto"]) == 1
+    report = capsys.readouterr()
+    assert "via: app → lib → crypt" in report.out
+    assert "lists direct dependencies only" not in report.err
+    assert main([*args, "--deps", "--extra", "crypto", "--json", "--all"]) == 1
+    rows = {p["name"]: p["results"] for p in json.loads(capsys.readouterr().out)["packages"]}
+    assert rows["b"] == {"win-arm64": "wheel", "linux-x86_64": "n/a"}
+    assert rows["crypt"] == {"win-arm64": "source", "linux-x86_64": "wheel"}
+
+
+def test_pyproject_deps_never_sends_private_index_roots_to_pypi(tmp_path, index, capsys):
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        '[project]\nname = "workshop"\ndependencies = ["private-package"]\n'
+        '[tool.uv]\nindex-url = "https://example.invalid/simple"\n',
+        encoding="utf-8",
+    )
+    assert main([str(pyproject), "--deps"]) == 2
+    assert "configures an installer index or source" in capsys.readouterr().err
+    assert index == []
+
+
 def test_round_limit_refuses(index, monkeypatch):
     monkeypatch.setattr(deps, "MAX_ROUNDS", 1)
     with pytest.raises(DepsError, match="can't settle on releases"):

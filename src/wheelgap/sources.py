@@ -175,7 +175,7 @@ class Source:
     pypi_only: bool = False
     # A project directory with pixi.lock as well as the lockfile that was picked: the pixi.lock, for a note.
     passed_over: Path | None = None
-    # Package names on the command line: the requirements as typed, for --deps.
+    # Command-line or selected pyproject.toml requirements, including extras, for --deps.
     specs: list[str] = field(default_factory=list)
     # --deps (deps.py): per target, the packages installed and the dependency path to each, keyed by index into
     # `packages`. check() uses it in place of a lockfile's graph.
@@ -1145,8 +1145,7 @@ def _nearby_config_names_an_index(path: Path) -> bool:
 
 
 def parse_pyproject(path: Path) -> Source:
-    """A library's direct dependencies: [project] dependencies, read as requirement lines. Their own
-    dependencies aren't known without a lockfile, so they aren't checked."""
+    """Read a library's [project] dependencies as requirement lines."""
     try:
         data = tomllib.loads(path.read_text(encoding="utf-8"))
     except tomllib.TOMLDecodeError as e:
@@ -1205,6 +1204,7 @@ def parse_pyproject(path: Path) -> Source:
         pkg = requirement_to_package(line, path.name)
         if pkg.key != source.pyproject_name:
             source.packages.append(pkg)
+            source.specs.append(line)
             continue
         # `myproject[extra]` in its own dependencies: installing the project installs that extra too.
         self_extras.extend(_self_reference_extras(source, line, Requirement(line)))
@@ -1266,6 +1266,8 @@ def _add_extras(source: Source, wanted: list[str]) -> None:
                 wanted.extend(_self_reference_extras(source, line, req))
                 continue
             pkg = requirement_to_package(line, source.label)
+            if line not in source.specs:
+                source.specs.append(line)
             if pkg not in source.packages:  # also in another extra or in dependencies: one row
                 source.packages.append(pkg)
 

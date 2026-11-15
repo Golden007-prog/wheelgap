@@ -136,7 +136,8 @@ directory's `pixi.lock` the lockfile read. Naming one for any other input is an 
 
 ### `--deps` {#deps}
 
-For package names on the command line, also check everything they install. wheelgap resolves the
+For package names on the command line or requirements declared in `pyproject.toml`, also check what they install.
+For a project file, this includes any extras you select with `--extra` or `--all-extras`. wheelgap resolves the
 tree for each target from PyPI's metadata: for each requirement, the newest release that meets every constraint on it,
 supports the target's Python and isn't yanked (a yanked release only for an `==` pin), following markers and extras as
 pip evaluates them on that target. `--explain` shows the path to each gap (`via: mcp → PyJWT → cryptography`), and
@@ -151,7 +152,8 @@ matching release, as `missing`, rather than walking back to an old release of wh
 read from a wheel's own metadata file, since PyPI's JSON page can leave them out. A marker it can't evaluate for a
 target (`platform_release`) counts as true there. It looks
 up each package in the tree on the PyPI JSON API, so it doesn't work with `--offline`, `--index-url` or a lockfile
-input; a lockfile from `uv lock` or `pip-compile` is exact, so prefer one when you have it.
+input. It also refuses a project that configures another installer index or source. A lockfile from `uv lock` or
+`pip-compile` is exact, so prefer one when you have it.
 
 ### `--online` {#online}
 
