@@ -24,6 +24,10 @@ you ship. This can run on a different architecture from the one being checked.
 wheelgap uv.lock -t win-arm64 -p 3.13 -p 3.14 --explain
 ```
 
+No lockfile? To check whether `pip install NAME` would compile anything, pass the name with
+[`--deps`](cli.md#deps), which also checks everything it installs and names the path to each gap:
+`wheelgap mcp==2.3.0 --deps -t win-arm64 --explain` finds cryptography via `mcp → PyJWT → cryptography`.
+
 Use `-p 3.14t` to check free-threaded 3.14 separately. In the report, `source`
 means wheelgap found a source distribution but no matching wheel. It can't tell
 from the filenames whether the source build will succeed. For the full list of
