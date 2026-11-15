@@ -45,7 +45,8 @@ With Nox running on Python 3.11 or newer, run `nox -s wheels` from the project
 directory. The session installs wheelgap in its own environment and reads the
 deployment Python version and targets from the same
 [`[tool.wheelgap]` table](configuration.md) shown in the tox recipe. Pass extra
-options after `--`, for example `nox -s wheels -- --explain`.
+options after `--`, for example `nox -s wheels -- --explain`. A gap that fails
+wheelgap's configured policy also fails the nox session.
 
 ## Multi-arch images
 
