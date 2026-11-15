@@ -35,6 +35,7 @@ Run with --explain to see which wheels were rejected and why.
 - [Getting started](getting-started.md): install, the first run, and reading the table.
 - [Inputs](inputs.md): which lockfiles and files wheelgap reads, and what it skips.
 - [Targets](targets.md): platform names, aliases, and the glibc, musl, macOS, iOS and Android floors.
+- [Windows on ARM](windows-arm.md): check for missing wheels and understand source-build failures.
 - [Configuration](configuration.md): every `[tool.wheelgap]` key in `pyproject.toml`.
 - [Output](output.md): the text table, `--json`, `--markdown`, `--junit` and exit codes.
 - [CI](ci.md): the GitHub Action, pre-commit and GitLab CI.
