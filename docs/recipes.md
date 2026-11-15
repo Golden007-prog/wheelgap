@@ -65,6 +65,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: wheelgap/wheelgap@v0.11.0
         with:
           args: uv.lock -p 3.13 -t linux-x86_64,musl-aarch64
@@ -78,8 +79,9 @@ for the target branch if you want it to block Renovate automerge.
 
 Replace the targets with the ones you deploy, or set them in
 [`[tool.wheelgap]`](configuration.md) and shorten `args` to `uv.lock`.
-Keep the default pull request checkout so [`compare-to: base`](ci.md#compare-to)
-can find the base lockfile.
+Keep the pull request's default merge checkout so [`compare-to: base`](ci.md#compare-to)
+can find the base lockfile. `fetch-depth: 0` fetches the base branch with it, which a private repository needs
+with `persist-credentials: false`.
 
 ## Multi-arch images
 
