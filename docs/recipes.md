@@ -65,7 +65,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: wheelgap/wheelgap@v0.10.0
+      - uses: wheelgap/wheelgap@v0.11.0
         with:
           args: uv.lock -p 3.13 -t linux-x86_64,musl-aarch64
           compare-to: base
