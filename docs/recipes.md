@@ -2,6 +2,31 @@
 
 Practical ways to check your project's dependencies with wheelgap.
 
+## tox
+
+Add a dedicated environment to `tox.ini` in the directory containing `uv.lock`:
+
+```ini
+[testenv:wheels]
+skip_install = true
+deps = wheelgap
+commands = wheelgap uv.lock {posargs}
+```
+
+Set your deployment targets in `pyproject.toml` using the
+[wheelgap configuration table](configuration.md):
+
+```toml
+[tool.wheelgap]
+python = ["3.13"]
+targets = ["linux-x86_64", "linux-aarch64"]
+```
+
+Run `tox -e wheels` to check the lockfile without installing the project or its
+dependencies. Pass extra options after `--`, for example
+`tox -e wheels -- --explain` to show why individual wheels were rejected. A gap
+that fails wheelgap's configured policy also fails the tox environment.
+
 ## Multi-arch images
 
 Check both architectures before building an image for AMD64 and ARM64. This
