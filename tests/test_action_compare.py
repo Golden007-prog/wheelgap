@@ -117,10 +117,9 @@ def test_comment_suggests_only_worsened_packages(monkeypatch, fake_pypi, capsys,
 def test_comment_suggestions_keep_names_from_private_base_local(monkeypatch, fake_pypi, capsys, tmp_path):
     monkeypatch.setenv("_WHEELGAP_ACTION_SUGGEST", "1")
     old = tmp_path / "uv.lock"
+    base = (FIXTURES / "base" / "uv.lock").read_text(encoding="utf-8")
     old.write_text(
-        (FIXTURES / "base" / "uv.lock").read_text(encoding="utf-8").replace(
-            "https://pypi.org/simple", "https://private.example.invalid/simple", 1
-        ),
+        base.replace("https://pypi.org/simple", "https://private.example.invalid/simple", 1),
         encoding="utf-8",
     )
     assert diff_main([str(old), str(FIXTURES / "head" / "uv.lock"), *ARGS, "--json"]) == 1
