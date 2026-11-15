@@ -1658,6 +1658,11 @@ def _main(argv: list[str]) -> int:
                         f"{source.label}: the project configures an installer index or source; "
                         "--deps uses only PyPI, so check a lockfile instead"
                     )
+                if (env := origin.index_env()) is not None:
+                    raise SourceError(
+                        f"{source.label}: {env} may point pip or uv at another index, and --deps uses only PyPI, "
+                        "so check a lockfile instead"
+                    )
             resolver = Resolver()
             for source in dependency_sources:
                 resolve_deps(source, targets, resolver)

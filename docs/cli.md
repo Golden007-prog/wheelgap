@@ -152,7 +152,9 @@ matching release, as `missing`, rather than walking back to an old release of wh
 read from a wheel's own metadata file, since PyPI's JSON page can leave them out. A marker it can't evaluate for a
 target (`platform_release`) counts as true there. It looks
 up each package in the tree on the PyPI JSON API, so it doesn't work with `--offline`, `--index-url` or a lockfile
-input. It also refuses a project that configures another installer index or source. A lockfile from `uv lock` or
+input. It also refuses a project that configures another installer index or source in its own files, or
+when a pip or uv index variable (`PIP_INDEX_URL`, `UV_INDEX_URL` and the like) is set; it can't see a `pip.conf` or
+your user-level uv config, so with a private index there, use a lockfile. A lockfile from `uv lock` or
 `pip-compile` is exact, so prefer one when you have it.
 
 ### `--online` {#online}

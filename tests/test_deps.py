@@ -251,6 +251,15 @@ def test_pyproject_deps_never_sends_private_index_roots_to_pypi(tmp_path, index,
     assert index == []
 
 
+def test_pyproject_deps_refuses_an_index_set_in_the_environment(tmp_path, index, capsys, monkeypatch):
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text('[project]\nname = "workshop"\ndependencies = ["private-package"]\n', encoding="utf-8")
+    monkeypatch.setenv("PIP_INDEX_URL", "https://example.invalid/simple")
+    assert main([str(pyproject), "--deps"]) == 2
+    assert "PIP_INDEX_URL may point pip or uv at another index" in capsys.readouterr().err
+    assert index == []
+
+
 def test_round_limit_refuses(index, monkeypatch):
     monkeypatch.setattr(deps, "MAX_ROUNDS", 1)
     with pytest.raises(DepsError, match="can't settle on releases"):
