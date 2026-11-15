@@ -62,6 +62,6 @@ This can affect projects that depend on it indirectly, for example through
   in the package's own build instructions, such as
   [cryptography's Windows requirements](https://cryptography.io/en/latest/installation/#building-cryptography-on-windows).
   This preserves native execution but adds build time and toolchain upkeep.
-- Use [x64 emulation on Windows 11 on ARM](https://learn.microsoft.com/en-us/windows/arm/add-arm-support).
+- Use [x64 emulation on Windows 11 on ARM](https://learn.microsoft.com/en-us/windows/arm/apps-on-arm-x86-emulation).
   Install x64 Python in a separate environment and check it with `-t win-amd64`.
   This can make more wheels available at the cost of emulation overhead.
