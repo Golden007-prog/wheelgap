@@ -302,7 +302,7 @@ except KeyboardInterrupt:
         ],
         capture_output=True,
         text=True,
-        timeout=6,
+        timeout=30,  # only a hang takes this long: startup on a busy Windows or macOS runner can take seconds
     )
     assert result.returncode == 130, result.stderr
 
